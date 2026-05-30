@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CompanyLens — AI Business Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: #2a2a3e;
+    --accent: #7c6af7;
+    --accent2: #f7c56a;
+    --text: #e8e8f0;
+    --muted: #6a6a88;
+    --success: #4ade80;
+    --error: #f87171;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 28px 40px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .logo-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  header h1 span { color: var(--accent); }
+  .header-tag {
+    margin-left: auto;
+    font-size: 0.65rem;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── Layout ── */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 40px;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+  @media (max-width: 760px) {
+    main { padding: 24px 20px; }
+    .grid-2 { grid-template-columns: 1fr; }
+    header { padding: 20px; }
+  }
+
+  /* ── Section Titles ── */
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    letter-spacing: -0.03em;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    transition: border-color 0.2s;
+  }
+  .card:focus-within { border-color: var(--accent); }
+
+  /* ── Inputs ── */
+  .input-group { margin-bottom: 16px; }
+  label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  input[type="text"], input[type="url"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124,106,247,0.15);
+  }
+  input::placeholder { color: var(--muted); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 24px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) { background: #9485f8; transform: translateY(-1px); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+
+  /* ── Spinner / Loading ── */
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading .spinner { display: inline-block; }
+
+  /* ── Status Bar ── */
+  .status-bar {
+    font-size: 0.72rem;
+    margin-top: 14px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid;
+  }
+  .status-bar.show { display: flex; }
+  .status-bar.info { background: rgba(124,106,247,0.1); border-color: rgba(124,106,247,0.3); color: var(--accent); }
+  .status-bar.success { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.3); color: var(--success); }
+  .status-bar.error { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.3); color: var(--error); }
+
+  /* ── Result Card ── */
+  #enrich-result { margin-top: 20px; display: none; }
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .result-card .company-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .company-name-big {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+  .company-url-tag {
+    font-size: 0.65rem;
+    color: var(--muted);
+    background: var(--surface2);
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 560px) { .fields-grid { grid-template-columns: 1fr; } }
+  .field-item {
+    background: var(--surface2);
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .field-item.full { grid-column: 1 / -1; }
+  .field-key {
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .field-val {
+    font-size: 0.82rem;
+    color: var(--text);
+    word-break: break-word;
+  }
+  .field-val .tag {
+    display: inline-block;
+    background: rgba(124,106,247,0.15);
+    color: var(--accent);
+    padding: 1px 8px;
+    border-radius: 4px;
+    margin: 2px 3px 2px 0;
+    font-size: 0.75rem;
+  }
+  .opener-box {
+    font-style: italic;
+    color: var(--accent2);
+    line-height: 1.7;
+    font-size: 0.82rem;
+  }
+
+  /* ── Results Table Section ── */
+  #results-section { margin-top: 48px; }
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  #results-count {
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  /* ── Company Cards Grid ── */
+  #results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 18px;
+    margin-top: 20px;
+  }
+  .company-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    transition: border-color 0.2s, transform 0.2s;
+    animation: fadeIn 0.35s ease both;
+    cursor: default;
+  }
+  .company-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .cc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; gap: 8px; }
+  .cc-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; }
+  .cc-url { font-size: 0.6rem; color: var(--muted); word-break: break-all; }
+  .cc-chip {
+    font-size: 0.58rem;
+    background: rgba(124,106,247,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(124,106,247,0.3);
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .cc-row { display: flex; gap: 6px; align-items: flex-start; margin-bottom: 7px; }
+  .cc-icon { color: var(--muted); font-size: 0.75rem; flex-shrink: 0; padding-top: 2px; }
+  .cc-text { font-size: 0.75rem; color: var(--text); word-break: break-word; }
+  .cc-text.muted { color: var(--muted); }
+  .cc-divider { height: 1px; background: var(--border); margin: 12px 0; }
+  .cc-opener { font-size: 0.72rem; color: var(--accent2); font-style: italic; line-height: 1.6; }
+
+  /* ── Empty State ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.8rem; }
+
+  /* ── Step Indicators ── */
+  .steps {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .step {
+    font-size: 0.65rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .step .num {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem;
+  }
+  .step-arrow { color: var(--border); font-size: 0.6rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-dot"></div>
+  <h1>Company<span>Lens</span></h1>
+  <span class="header-tag">AI INTELLIGENCE v1.0</span>
+</header>
+
+<main>
+
+  <!-- ── ENRICH SECTION ── -->
+  <div class="section-label">01 / Pipeline</div>
+  <div class="section-title">Enrich a Company</div>
+
+  <div class="steps">
+    <div class="step"><span class="num">1</span> Enter URL</div>
+    <span class="step-arrow">›</span>
+    <div class="step"><span class="num">2</span> AI Scrapes &amp; Analyses</div>
+    <span class="step-arrow">›</span>
+    <div class="step"><span class="num">3</span> Get Structured Profile</div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="input-group">
+        <label for="input-name">Website / Company Name (optional)</label>
+        <input type="text" id="input-name" placeholder="e.g. Stripe" />
+      </div>
+      <div class="input-group">
+        <label for="input-url">Company Website URL *</label>
+        <input type="url" id="input-url" placeholder="https://stripe.com" />
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-enrich" onclick="enrichCompany()">
+          <span class="spinner" id="enrich-spinner"></span>
+          <span id="enrich-btn-text">⚡ Enrich Company</span>
+        </button>
+        <button class="btn btn-secondary" onclick="clearEnrich()">✕ Clear</button>
+      </div>
+      <div class="status-bar" id="enrich-status"></div>
+    </div>
+
+    <div class="card" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;color:var(--muted);">
+      <div style="font-size:2rem;">🔬</div>
+      <div style="font-family:'Syne',sans-serif;font-size:0.9rem;color:var(--text);">What happens under the hood</div>
+      <div style="font-size:0.72rem;line-height:1.8;max-width:280px;">
+        Smart crawl → Sitemap + fuzzy link matching → HTML cleaning → AI extraction → Structured JSON profile
+      </div>
+    </div>
+  </div>
+
+  <div id="enrich-result"></div>
+
+  <!-- ── RESULTS SECTION ── -->
+  <div id="results-section">
+    <div class="results-header">
+      <div>
+        <div class="section-label">02 / Dataset</div>
+        <div class="section-title" style="margin-bottom:0">All Enriched Companies</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <span id="results-count"></span>
+        <button class="btn btn-secondary" id="btn-results" onclick="loadResults()">
+          <span class="spinner" id="results-spinner"></span>
+          <span id="results-btn-text">📊 Show All Results</span>
+        </button>
+        <button class="btn btn-secondary" onclick="clearResultsDisplay()">✕ Hide</button>
+      </div>
+    </div>
+    <div id="results-grid"></div>
+  </div>
+
+</main>
+
+<script>
+const API_BASE = window.location.origin; // same origin when served from Flask
+
+function setStatus(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = `status-bar show ${type}`;
+  el.innerHTML = `<span>${type === 'info' ? '⏳' : type === 'success' ? '✓' : '✗'}</span> ${msg}`;
+}
+
+function clearStatus(id) {
+  const el = document.getElementById(id);
+  el.className = 'status-bar';
+}
+
+function setLoading(btnId, spinnerId, textId, loading, defaultText) {
+  const btn = document.getElementById(btnId);
+  const spinner = document.getElementById(spinnerId);
+  const text = document.getElementById(textId);
+  btn.disabled = loading;
+  spinner.style.display = loading ? 'inline-block' : 'none';
+  text.textContent = loading ? 'Processing...' : defaultText;
+}
+
+async function enrichCompany() {
+  const url = document.getElementById('input-url').value.trim();
+  const name = document.getElementById('input-name').value.trim();
+  if (!url) { setStatus('enrich-status', 'error', 'Please enter a company URL.'); return; }
+
+  setLoading('btn-enrich', 'enrich-spinner', 'enrich-btn-text', true, '⚡ Enrich Company');
+  setStatus('enrich-status', 'info', 'Scraping website and running AI analysis... this may take 20–40 seconds.');
+  document.getElementById('enrich-result').style.display = 'none';
+
+  try {
+    const res = await fetch(`${API_BASE}/enrich`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, website_name: name })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Unknown error');
+    renderEnrichResult(data);
+    setStatus('enrich-status', 'success', `Successfully enriched: ${data.company_name}`);
+  } catch (e) {
+    setStatus('enrich-status', 'error', e.message);
+  } finally {
+    setLoading('btn-enrich', 'enrich-spinner', 'enrich-btn-text', false, '⚡ Enrich Company');
+  }
+}
+
+function renderEnrichResult(d) {
+  const mails = Array.isArray(d.mail) ? d.mail : (d.mail ? [d.mail] : []);
+  const mailHtml = mails.length
+    ? mails.map(m => `<span class="tag">${m}</span>`).join('')
+    : '<span style="color:var(--muted)">N/A</span>';
+
+  document.getElementById('enrich-result').innerHTML = `
+    <div class="result-card">
+      <div class="company-header">
+        <div class="company-name-big">${esc(d.company_name)}</div>
+        <span class="company-url-tag">${esc(d.source_url || '')}</span>
+      </div>
+      <div class="fields-grid">
+        <div class="field-item">
+          <div class="field-key">Website Name</div>
+          <div class="field-val">${esc(d.website_name)}</div>
+        </div>
+        <div class="field-item">
+          <div class="field-key">Phone</div>
+          <div class="field-val">${esc(d.mobile_number)}</div>
+        </div>
+        <div class="field-item full">
+          <div class="field-key">Address</div>
+          <div class="field-val">${esc(d.address)}</div>
+        </div>
+        <div class="field-item full">
+          <div class="field-key">Email(s)</div>
+          <div class="field-val">${mailHtml}</div>
+        </div>
+        <div class="field-item full">
+          <div class="field-key">Core Service</div>
+          <div class="field-val">${esc(d.core_service)}</div>
+        </div>
+        <div class="field-item">
+          <div class="field-key">Target Customer</div>
+          <div class="field-val">${esc(d.target_customer)}</div>
+        </div>
+        <div class="field-item">
+          <div class="field-key">Probable Pain Point</div>
+          <div class="field-val">${esc(d.probable_pain_point)}</div>
+        </div>
+        <div class="field-item full">
+          <div class="field-key">🎯 Outreach Opener</div>
+          <div class="field-val opener-box">${esc(d.outreach_opener)}</div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('enrich-result').style.display = 'block';
+}
+
+async function loadResults() {
+  setLoading('btn-results', 'results-spinner', 'results-btn-text', true, '📊 Show All Results');
+  try {
+    const res = await fetch(`${API_BASE}/results`);
+    const data = await res.json();
+    renderResultsGrid(data);
+    document.getElementById('results-count').textContent = `${data.length} compan${data.length === 1 ? 'y' : 'ies'}`;
+  } catch (e) {
+    document.getElementById('results-grid').innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>${e.message}</p></div>`;
+  } finally {
+    setLoading('btn-results', 'results-spinner', 'results-btn-text', false, '📊 Show All Results');
+  }
+}
+
+function renderResultsGrid(companies) {
+  const grid = document.getElementById('results-grid');
+  if (!companies.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="icon">🏢</div><p>No enriched companies yet. Use the Enrich section above to get started.</p></div>`;
+    return;
+  }
+  grid.innerHTML = companies.map((d, i) => {
+    const mails = Array.isArray(d.mail) ? d.mail : (d.mail ? [d.mail] : []);
+    return `
+    <div class="company-card" style="animation-delay:${i * 0.05}s">
+      <div class="cc-header">
+        <div>
+          <div class="cc-name">${esc(d.company_name)}</div>
+          <div class="cc-url">${esc(d.source_url || '')}</div>
+        </div>
+        <span class="cc-chip">${esc(d.website_name)}</span>
+      </div>
+      <div class="cc-row"><span class="cc-icon">📍</span><span class="cc-text ${d.address==='N/A'?'muted':''}">${esc(d.address)}</span></div>
+      <div class="cc-row"><span class="cc-icon">📞</span><span class="cc-text ${d.mobile_number==='N/A'?'muted':''}">${esc(d.mobile_number)}</span></div>
+      <div class="cc-row"><span class="cc-icon">✉️</span><span class="cc-text">${mails.length ? mails.join(' · ') : '<span style="color:var(--muted)">N/A</span>'}</span></div>
+      <div class="cc-divider"></div>
+      <div class="cc-row"><span class="cc-icon">⚙️</span><span class="cc-text">${esc(d.core_service)}</span></div>
+      <div class="cc-row"><span class="cc-icon">🎯</span><span class="cc-text">${esc(d.target_customer)}</span></div>
+      <div class="cc-row"><span class="cc-icon">💢</span><span class="cc-text">${esc(d.probable_pain_point)}</span></div>
+      <div class="cc-divider"></div>
+      <div class="cc-opener">"${esc(d.outreach_opener)}"</div>
+    </div>`;
+  }).join('');
+}
+
+function clearEnrich() {
+  document.getElementById('input-url').value = '';
+  document.getElementById('input-name').value = '';
+  document.getElementById('enrich-result').style.display = 'none';
+  clearStatus('enrich-status');
+}
+
+function clearResultsDisplay() {
+  document.getElementById('results-grid').innerHTML = '';
+  document.getElementById('results-count').textContent = '';
+}
+
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
