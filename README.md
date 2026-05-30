@@ -18,6 +18,11 @@ company-enricher/
 ```
 
 ---
+# Live Demo: https://company-enricher-cdgs.onrender.com/
+
+## Working of the webapp
+<img width="1851" height="757" alt="Screenshot (424)" src="https://github.com/user-attachments/assets/a9fef99a-ef1e-43a2-b168-863a4d9dcb39" />
+
 
 ## 🚀 Local Setup
 
